@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carbon and Its Compounds — Virtual Chemistry Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    input[type="range"] {
+      accent-color: #2563eb;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 flex min-h-[60px] flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-2">
+    <div class="flex items-center gap-3">
+      <div class="flex h-11 w-12 items-center justify-center rounded-xl bg-purple-50 text-2xl">
+        🧪
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-slate-900">Carbon and Its Compounds Lab</h1>
+        <p class="text-sm text-slate-500">
+          Class 10 NCERT Chemistry — Covalent Bonding, Hydrocarbons &amp; Functional Groups
+        </p>
+      </div>
+    </div>
+
+    <!-- MODE SWITCHER -->
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="flex rounded-lg border border-slate-200 bg-slate-100 p-1">
+        <button
+          id="btnTabCovalent"
+          onclick="switchTab('covalent')"
+          class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition"
+        >
+          1. Covalent Bonding (Lewis Dot)
+        </button>
+        <button
+          id="btnTabHydro"
+          onclick="switchTab('hydro')"
+          class="rounded-md px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+        >
+          2. Hydrocarbons &amp; Organic Builder
+        </button>
+      </div>
+
+      <button
+        onclick="resetLab()"
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-slate-50"
+      >
+        ↺ Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 1: COVALENT BONDING & ELECTRON DOT STRUCTURES                     -->
+  <!-- ===================================================================== -->
+  <div id="tabCovalent">
+    <section class="border-b border-slate-200 bg-white">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
+        <div>
+          <h2 id="covTitle" class="font-bold text-blue-700">
+            Methane (CH₄) — Four Single Covalent Bonds
+          </h2>
+          <p id="covSubtitle" class="text-xs text-slate-500">
+            Carbon (Z = 6, Config: 2, 4) shares 4 valence electrons with 4 Hydrogen atoms to achieve a stable octet
+          </p>
+        </div>
+
+        <!-- MOLECULE PRESET BUTTONS -->
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="selectMolecule('ch4')" id="mol-ch4" class="mol-pill rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white">
+            CH₄ (Methane)
+          </button>
+          <button onclick="selectMolecule('c2h6')" id="mol-c2h6" class="mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            C₂H₆ (Ethane)
+          </button>
+          <button onclick="selectMolecule('c2h4')" id="mol-c2h4" class="mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            C₂H₄ (Ethene)
+          </button>
+          <button onclick="selectMolecule('c2h2')" id="mol-c2h2" class="mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            C₂H₂ (Ethyne)
+          </button>
+          <button onclick="selectMolecule('co2')" id="mol-co2" class="mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            CO₂ (Carbon Dioxide)
+          </button>
+          <button onclick="selectMolecule('n2')" id="mol-n2" class="mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50">
+            N₂ (Nitrogen)
+          </button>
+        </div>
+      </div>
+
+      <!-- ELECTRON DOT CANVAS -->
+      <div class="relative overflow-x-auto px-2 py-2">
+        <canvas
+          id="covalentCanvas"
+          width="1100"
+          height="390"
+          class="mx-auto block w-full max-w-[1100px] rounded-lg border border-slate-100 bg-slate-50/40"
+        ></canvas>
+      </div>
+
+      <!-- VIEW TOGGLES -->
+      <div class="mx-4 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+          <label class="flex cursor-pointer items-center gap-2">
+            <input id="chkShowShells" type="checkbox" checked class="h-4 w-4 rounded" />
+            <span>Show Overlapping Valence Shells</span>
+          </label>
+          <label class="flex cursor-pointer items-center gap-2">
+            <input id="chkShowBondLines" type="checkbox" checked class="h-4 w-4 rounded" />
+            <span>Show Structural Bond Lines (Side-by-Side)</span>
+          </label>
+        </div>
+
+        <div class="text-xs font-semibold text-slate-600">
+          💡 1 shared pair = <strong>Single Bond (—)</strong> | 2 shared pairs = <strong>Double Bond (=)</strong> | 3 shared pairs = <strong>Triple Bond (≡)</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- COVALENT DASHBOARD -->
+    <main class="grid grid-cols-1 gap-4 p-4 lg:grid-cols-3">
+      <!-- BOND METRICS -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-4 border-b border-slate-100 pb-3 text-lg font-bold">
+          ✨ Bond &amp; Octet Summary
+        </h2>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold tracking-wide text-slate-500">BOND TYPE</p>
+            <p id="cardBondType" class="mt-2 text-lg font-bold text-blue-600">Single Covalent</p>
+            <p id="cardBondSymbol" class="text-xs font-semibold text-slate-600">4 × (C—H)</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold tracking-wide text-slate-500">SHARED ELECTRONS</p>
+            <p id="cardSharedElectrons" class="mt-2 text-2xl font-bold text-emerald-600">8 e⁻</p>
+            <p id="cardSharedPairs" class="text-xs font-semibold text-slate-600">4 shared pairs</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold tracking-wide text-slate-500">SATURATION</p>
+            <p id="cardSaturation" class="mt-2 text-lg font-bold text-purple-600">Saturated</p>
+            <p class="text-xs font-semibold text-slate-600">Clean blue flame</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold tracking-wide text-slate-500">CONDUCTIVITY</p>
+            <p class="mt-2 text-lg font-bold text-slate-700">Non-Conductor</p>
+            <p class="text-xs font-semibold text-slate-600">No free ions formed</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VERSATILE NATURE OF CARBON -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-3 border-b border-slate-100 pb-3 text-lg font-bold">
+          🧬 Why Carbon Forms Millions of Compounds
+        </h2>
+        <div class="space-y-3 text-xs leading-5 text-slate-700">
+          <div class="rounded-lg border border-blue-100 bg-blue-50 p-2.5">
+            <strong class="text-blue-900">1. Catenation (Self-Linking):</strong><br />
+            Carbon forms strong covalent C—C bonds with other carbon atoms to create long straight chains, branched chains, and closed rings.
+          </div>
+          <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-2.5">
+            <strong class="text-emerald-900">2. Tetravalency (Valency = 4):</strong><br />
+            With 4 valence electrons, Carbon bonds with 4 monovalent atoms (H, Cl) or forms multiple bonds with O, N, and S.
+          </div>
+          <div class="rounded-lg border border-purple-100 bg-purple-50 p-2.5">
+            <strong class="text-purple-900">3. Small Atomic Size:</strong><br />
+            Carbon's nucleus holds shared electron pairs tightly, making C—C and C—H bonds exceptionally stable.
+          </div>
+        </div>
+      </section>
+
+      <!-- WHY NOT C4+ OR C4- -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-3 border-b border-slate-100 pb-3 text-lg font-bold">
+          📚 Why Carbon Doesn't Form Ionic Bonds
+        </h2>
+        <div class="space-y-3 text-xs leading-5 text-slate-700">
+          <p>
+            Carbon has atomic number <strong>Z = 6</strong> (electronic configuration <strong>2, 4</strong>). To attain noble gas configuration:
+          </p>
+          <div class="rounded-lg bg-slate-50 p-2.5">
+            <strong>❌ Cannot gain 4 electrons (C⁴⁻ anion):</strong><br />
+            It is energetically difficult for a nucleus with only 6 protons to hold onto 10 electrons (4 extra electrons).
+          </div>
+          <div class="rounded-lg bg-slate-50 p-2.5">
+            <strong>❌ Cannot lose 4 electrons (C⁴⁺ cation):</strong><br />
+            Removing 4 electrons requires a massive amount of ionization energy, leaving behind a tiny cation with 6 protons holding just 2 electrons.
+          </div>
+          <p class="font-semibold text-blue-700">
+            ✓ Solution: Carbon shares its 4 valence electrons to form Covalent Bonds!
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 2: HYDROCARBONS, HOMOLOGOUS SERIES & FUNCTIONAL GROUP BUILDER     -->
+  <!-- ===================================================================== -->
+  <div id="tabHydro" class="hidden">
+    <section class="border-b border-slate-200 bg-white">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
+        <div>
+          <h2 id="iupacHeader" class="font-bold text-blue-700">
+            IUPAC Name: Propane (C₃H₈)
+          </h2>
+          <p id="iupacSub" class="text-xs text-slate-500">
+            Saturated Alkane Series — General Formula: CₙH₂ₙ₊₂
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3 text-xs font-semibold">
+          <span class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-slate-800"></span> Carbon (C)
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full border border-slate-400 bg-white"></span> Hydrogen (H)
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-red-600"></span> Oxygen (O)
+          </span>
+          <span class="flex items-center gap-2">
+            <span class="h-3 w-3 rounded-full bg-emerald-600"></span> Chlorine (Cl)
+          </span>
+        </div>
+      </div>
+
+      <!-- STRUCTURAL FORMULA CANVAS -->
+      <div class="relative overflow-x-auto px-2 py-2">
+        <canvas
+          id="hydroCanvas"
+          width="1100"
+          height="350"
+          class="mx-auto block w-full max-w-[1100px] rounded-lg border border-slate-100 bg-slate-50/40"
+        ></canvas>
+      </div>
+    </section>
+
+    <!-- BUILDER DASHBOARD -->
+    <main class="grid grid-cols-1 gap-4 p-4 lg:grid-cols-3">
+      <!-- CHAIN & FUNCTIONAL GROUP CONTROLS -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-4 border-b border-slate-100 pb-3 text-lg font-bold">
+          🎚 Molecular Structure Builder
+        </h2>
+
+        <!-- Carbon Chain Length Slider -->
+        <div class="mb-5">
+          <div class="mb-2 flex items-center justify-between">
+            <label class="text-sm font-semibold">Number of Carbon Atoms (n)</label>
+            <span id="valCarbonN" class="rounded-md bg-blue-50 px-2 py-1 text-xs font-bold text-blue-700">
+              n = 3 (Prop-)
+            </span>
+          </div>
+          <input id="sliderCarbonN" type="range" min="1" max="6" step="1" value="3" class="w-full" />
+          <div class="mt-1 flex justify-between text-[10px] font-bold text-slate-400">
+            <span>1:Meth</span>
+            <span>2:Eth</span>
+            <span>3:Prop</span>
+            <span>4:But</span>
+            <span>5:Pent</span>
+            <span>6:Hex</span>
+          </div>
+        </div>
+
+        <!-- Hydrocarbon Series Selector -->
+        <div class="mb-5">
+          <label class="mb-1.5 block text-sm font-semibold">Carbon-Carbon Bond Type (Series)</label>
+          <select id="selectSeries" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium">
+            <option value="alkane" selected>Alkane — All Single Bonds (-ane) [CₙH₂ₙ₊₂]</option>
+            <option value="alkene">Alkene — One Double Bond (-ene) [CₙH₂ₙ]</option>
+            <option value="alkyne">Alkyne — One Triple Bond (-yne) [CₙH₂ₙ₋₂]</option>
+          </select>
+          <p id="seriesNote" class="mt-1 hidden text-[11px] font-semibold text-amber-700">
+            Note: Alkenes and Alkynes require at least 2 Carbon atoms (n ≥ 2). Adjusted to n = 2.
+          </p>
+        </div>
+
+        <!-- Functional Group Selector -->
+        <div class="mb-2">
+          <label class="mb-1.5 block text-sm font-semibold">Attach Functional Group (Heteroatom)</label>
+          <select id="selectFuncGroup" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium">
+            <option value="none" selected>None (Pure Hydrocarbon)</option>
+            <option value="alcohol">Alcohol (—OH) → Suffix: -ol</option>
+            <option value="aldehyde">Aldehyde (—CHO) → Suffix: -al</option>
+            <option value="acid">Carboxylic Acid (—COOH) → Suffix: -oic acid</option>
+            <option value="halo">Haloalkane (—Cl) → Prefix: Chloro-</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- LIVE MOLECULAR PROPERTIES -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-4 border-b border-slate-100 pb-3 text-lg font-bold">
+          ✨ IUPAC &amp; Chemical Properties
+        </h2>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold text-slate-500">IUPAC NAME</p>
+            <p id="cardIupac" class="mt-2 text-xl font-bold text-blue-600">Propane</p>
+            <p id="cardRootWord" class="text-xs font-semibold text-slate-600">Root: Prop + ane</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold text-slate-500">MOLECULAR FORMULA</p>
+            <p id="cardMolFormula" class="mt-2 text-xl font-bold text-emerald-600">C₃H₈</p>
+            <p id="cardGenFormula" class="text-xs font-semibold text-slate-600">General: CₙH₂ₙ₊₂</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold text-slate-500">MOLECULAR MASS</p>
+            <p id="cardMolMass" class="mt-2 text-2xl font-bold text-purple-600">44 u</p>
+            <p class="text-xs font-semibold text-slate-600">Homolog diff: 14 u (—CH₂—)</p>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p class="text-[10px] font-bold text-slate-500">CHEMICAL REACTIVITY</p>
+            <p id="cardReactivity" class="mt-2 text-lg font-bold text-amber-600">Substitution</p>
+            <p id="cardFlame" class="text-xs font-semibold text-slate-600">Clean non-sooty flame</p>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-700">
+          <strong>Condensed Formula:</strong> <span id="cardCondensed" class="text-blue-700">CH₃—CH₂—CH₃</span>
+        </div>
+      </section>
+
+      <!-- HOMOLOGOUS SERIES & CHEMICAL REACTIONS -->
+      <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <h2 class="mb-3 border-b border-slate-100 pb-3 text-lg font-bold">
+          📖 Key NCERT Organic Concepts
+        </h2>
+
+        <div class="space-y-3 text-xs leading-5 text-slate-700">
+          <div class="rounded-lg bg-emerald-50 p-2.5 text-emerald-900">
+            <strong>Homologous Series Rule:</strong><br />
+            Successive members differ by a <strong>—CH₂—</strong> unit and a molecular mass of <strong>14 u</strong>. They share the same functional group and chemical properties, while boiling/melting points increase with molecular mass.
+          </div>
+
+          <div class="rounded-lg bg-amber-50 p-2.5 text-amber-900">
+            <strong>Combustion &amp; Addition Reactions:</strong><br />
+            • <strong>Saturated (Alkanes):</strong> Burn with a clean blue flame; undergo substitution with $\text{Cl}_2$ in sunlight.<br />
+            • <strong>Unsaturated (Alkenes/Alkynes):</strong> Burn with a yellow sooty flame; undergo <em>Addition Reaction</em> ($\text{H}_2$ + Ni catalyst) to form saturated fats/alkanes.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 bg-white px-4 py-4 text-center text-xs text-slate-500">
+    Carbon and Its Compounds Virtual Lab | Covalent Bonding | Homologous Series | IUPAC Nomenclature
+  </footer>
+
+  <script>
+    let activeTab = "covalent";
+
+    function switchTab(tab) {
+      activeTab = tab;
+      const cSec = document.getElementById("tabCovalent");
+      const hSec = document.getElementById("tabHydro");
+      const btnC = document.getElementById("btnTabCovalent");
+      const btnH = document.getElementById("btnTabHydro");
+
+      if (tab === "covalent") {
+        cSec.classList.remove("hidden");
+        hSec.classList.add("hidden");
+        btnC.className = "rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition";
+        btnH.className = "rounded-md px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+        renderCovalentCanvas();
+      } else {
+        cSec.classList.add("hidden");
+        hSec.classList.remove("hidden");
+        btnH.className = "rounded-md bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition";
+        btnC.className = "rounded-md px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+        updateHydroBuilder();
+      }
+    }
+
+    // =========================================================================
+    // TAB 1: COVALENT BONDING & ELECTRON DOT STRUCTURES
+    // =========================================================================
+    const covCanvas = document.getElementById("covalentCanvas");
+    const cCtx = covCanvas.getContext("2d");
+
+    const MOLECULES = {
+      ch4: {
+        title: "Methane (CH₄) — Four Single Covalent Bonds",
+        subtitle: "Carbon (2, 4) shares 4 valence electrons with 4 Hydrogen atoms (1) to complete its octet",
+        bondType: "Single Covalent",
+        bondSymbol: "4 × (C—H) single bonds",
+        sharedElectrons: "8 e⁻",
+        sharedPairs: "4 shared pairs",
+        saturation: "Saturated",
+        structuralLines: [
+          "      H",
+          "      |",
+          "  H — C — H",
+          "      |",
+          "      H"
+        ],
+        atoms: [
+          { el: "C", x: 350, y: 195, r: 75, color: "#1e293b" },
+          { el: "H", x: 350, y: 92, r: 44, color: "#2563eb" },
+          { el: "H", x: 350, y: 298, r: 44, color: "#2563eb" },
+          { el: "H", x: 247, y: 195, r: 44, color: "#2563eb" },
+          { el: "H", x: 453, y: 195, r: 44, color: "#2563eb" },
+        ],
+        sharedDots: [
+          // Top C-H pair
+          { x: 344, y: 132, type: "C" }, { x: 356, y: 132, type: "H" },
+          // Bottom C-H pair
+          { x: 344, y: 258, type: "C" }, { x: 356, y: 258, type: "H" },
+          // Left C-H pair
+          { x: 287, y: 189, type: "C" }, { x: 287, y: 201, type: "H" },
+          // Right C-H pair
+          { x: 413, y: 189, type: "C" }, { x: 413, y: 201, type: "H" },
+        ]
+      },
+      c2h6: {
+        title: "Ethane (C₂H₆) — Single C—C and C—H Covalent Bonds",
+        subtitle: "Two Carbon atoms share 1 pair of electrons between them and 3 pairs with Hydrogen atoms",
+        bondType: "Single Covalent",
+        bondSymbol: "1 × (C—C), 6 × (C—H)",
+        sharedElectrons: "14 e⁻",
+        sharedPairs: "7 shared pairs",
+        saturation: "Saturated",
+        structuralLines: [
+          "    H   H",
+          "    |   |",
+          "H — C — C — H",
+          "    |   |",
+          "    H   H"
+        ],
+        atoms: [
+          { el: "C", x: 295, y: 195, r: 68, color: "#1e293b" },
+          { el: "C", x: 415, y: 195, r: 68, color: "#1e293b" },
+          { el: "H", x: 200, y: 195, r: 40, color: "#2563eb" },
+          { el: "H", x: 295, y: 100, r: 40, color: "#2563eb" },
+          { el: "H", x: 295, y: 290, r: 40, color: "#2563eb" },
+          { el: "H", x: 510, y: 195, r: 40, color: "#2563eb" },
+          { el: "H", x: 415, y: 100, r: 40, color: "#2563eb" },
+          { el: "H", x: 415, y: 290, r: 40, color: "#2563eb" },
+        ],
+        sharedDots: [
+          // C-C bond
+          { x: 355, y: 189, type: "C" }, { x: 355, y: 201, type: "C" },
+          // Left H's
+          { x: 235, y: 189, type: "C" }, { x: 235, y: 201, type: "H" },
+          { x: 289, y: 135, type: "C" }, { x: 301, y: 135, type: "H" },
+          { x: 289, y: 255, type: "C" }, { x: 301, y: 255, type: "H" },
+          // Right H's
+          { x: 475, y: 189, type: "C" }, { x: 475, y: 201, type: "H" },
+          { x: 409, y: 135, type: "C" }, { x: 421, y: 135, type: "H" },
+          { x: 409, y: 255, type: "C" }, { x: 421, y: 255, type: "H" },
+        ]
+      },
+      c2h4: {
+        title: "Ethene (C₂H₄) — Double Covalent Bond (C=C)",
+        subtitle: "Two Carbon atoms share 2 pairs of electrons (4 electrons) forming an unsaturated double bond",
+        bondType: "Double Covalent",
+        bondSymbol: "1 × (C=C), 4 × (C—H)",
+        sharedElectrons: "12 e⁻",
+        sharedPairs: "6 shared pairs",
+        saturation: "Unsaturated (Alkene)",
+        structuralLines: [
+          "  H       H",
+          "   \\     /",
+          "    C = C",
+          "   /     \\",
+          "  H       H"
+        ],
+        atoms: [
+          { el: "C", x: 300, y: 195, r: 68, color: "#1e293b" },
+          { el: "C", x: 410, y: 195, r: 68, color: "#1e293b" },
+          { el: "H", x: 230, y: 125, r: 40, color: "#2563eb" },
+          { el: "H", x: 230, y: 265, r: 40, color: "#2563eb" },
+          { el: "H", x: 480, y: 125, r: 40, color: "#2563eb" },
+          { el: "H", x: 480, y: 265, r: 40, color: "#2563eb" },
+        ],
+        sharedDots: [
+          // C=C double bond (4 electrons)
+          { x: 350, y: 182, type: "C" }, { x: 360, y: 182, type: "C" },
+          { x: 350, y: 208, type: "C" }, { x: 360, y: 208, type: "C" },
+          // 4 C-H bonds
+          { x: 254, y: 156, type: "C" }, { x: 263, y: 147, type: "H" },
+          { x: 254, y: 234, type: "C" }, { x: 263, y: 243, type: "H" },
+          { x: 456, y: 156, type: "C" }, { x: 447, y: 147, type: "H" },
+          { x: 456, y: 234, type: "C" }, { x: 447, y: 243, type: "H" },
+        ]
+      },
+      c2h2: {
+        title: "Ethyne / Acetylene (C₂H₂) — Triple Covalent Bond (C≡C)",
+        subtitle: "Two Carbon atoms share 3 pairs of electrons (6 electrons) between them to complete their octets",
+        bondType: "Triple Covalent",
+        bondSymbol: "1 × (C≡C), 2 × (C—H)",
+        sharedElectrons: "10 e⁻",
+        sharedPairs: "5 shared pairs",
+        saturation: "Unsaturated (Alkyne)",
+        structuralLines: [
+          "",
+          "",
+          "H — C ≡ C — H",
+          "",
+          ""
+        ],
+        atoms: [
+          { el: "C", x: 305, y: 195, r: 68, color: "#1e293b" },
+          { el: "C", x: 405, y: 195, r: 68, color: "#1e293b" },
+          { el: "H", x: 210, y: 195, r: 40, color: "#2563eb" },
+          { el: "H", x: 500, y: 195, r: 40, color: "#2563eb" },
+        ],
+        sharedDots: [
+          // C≡C triple bond (6 electrons)
+          { x: 350, y: 177, type: "C" }, { x: 360, y: 177, type: "C" },
+          { x: 350, y: 195, type: "C" }, { x: 360, y: 195, type: "C" },
+          { x: 350, y: 213, type: "C" }, { x: 360, y: 213, type: "C" },
+          // Left and right C-H
+          { x: 245, y: 189, type: "C" }, { x: 245, y: 201, type: "H" },
+          { x: 465, y: 189, type: "C" }, { x: 465, y: 201, type: "H" },
+        ]
+      },
+      co2: {
+        title: "Carbon Dioxide (CO₂) — Two Double Covalent Bonds (O=C=O)",
+        subtitle: "Carbon shares 2 electron pairs with each Oxygen atom (2, 6) so all three atoms achieve an octet",
+        bondType: "Double Covalent",
+        bondSymbol: "2 × (C=O) double bonds",
+        sharedElectrons: "8 e⁻",
+        sharedPairs: "4 shared pairs",
+        saturation: "Linear Molecule",
+        structuralLines: [
+          "",
+          "",
+          "  O = C = O",
+          "",
+          ""
+        ],
+        atoms: [
+          { el: "O", x: 245, y: 195, r: 68, color: "#dc2626" },
+          { el: "C", x: 355, y: 195, r: 68, color: "#1e293b" },
+          { el: "O", x: 465, y: 195, r: 68, color: "#dc2626" },
+        ],
+        sharedDots: [
+          // Left O=C
+          { x: 295, y: 183, type: "O" }, { x: 305, y: 183, type: "C" },
+          { x: 295, y: 207, type: "O" }, { x: 305, y: 207, type: "C" },
+          // Right C=O
+          { x: 405, y: 183, type: "C" }, { x: 415, y: 183, type: "O" },
+          { x: 405, y: 207, type: "C" }, { x: 415, y: 207, type: "O" },
+          // Lone pairs on Left O
+          { x: 188, y: 188, type: "O" }, { x: 188, y: 202, type: "O" },
+          { x: 238, y: 136, type: "O" }, { x: 252, y: 136, type: "O" },
+          // Lone pairs on Right O
+          { x: 522, y: 188, type: "O" }, { x: 522, y: 202, type: "O" },
+          { x: 458, y: 136, type: "O" }, { x: 472, y: 136, type: "O" },
+        ]
+      },
+      n2: {
+        title: "Nitrogen Molecule (N₂) — Triple Covalent Bond (N≡N)",
+        subtitle: "Each Nitrogen atom (2, 5) shares 3 electrons with the other, leaving 1 lone pair on each atom",
+        bondType: "Triple Covalent",
+        bondSymbol: "1 × (N≡N) triple bond",
+        sharedElectrons: "6 e⁻",
+        sharedPairs: "3 shared pairs",
+        saturation: "Diatomic Gas",
+        structuralLines: [
+          "",
+          "",
+          "   :N ≡ N:",
+          "",
+          ""
+        ],
+        atoms: [
+          { el: "N", x: 305, y: 195, r: 72, color: "#059669" },
+          { el: "N", x: 405, y: 195, r: 72, color: "#059669" },
+        ],
+        sharedDots: [
+          // 3 shared pairs
+          { x: 350, y: 177, type: "N" }, { x: 360, y: 177, type: "N" },
+          { x: 350, y: 195, type: "N" }, { x: 360, y: 195, type: "N" },
+          { x: 350, y: 213, type: "N" }, { x: 360, y: 213, type: "N" },
+          // Lone pair Left N
+          { x: 242, y: 188, type: "N" }, { x: 242, y: 202, type: "N" },
+          // Lone pair Right N
+          { x: 468, y: 188, type: "N" }, { x: 468, y: 202, type: "N" },
+        ]
+      }
+    };
+
+    let currentMolKey = "ch4";
+    let showShells = true;
+    let showBondLines = true;
+
+    document.getElementById("chkShowShells").addEventListener("change", (e) => {
+      showShells = e.target.checked;
+      renderCovalentCanvas();
+    });
+
+    document.getElementById("chkShowBondLines").addEventListener("change", (e) => {
+      showBondLines = e.target.checked;
+      renderCovalentCanvas();
+    });
+
+    function selectMolecule(key) {
+      currentMolKey = key;
+      document.querySelectorAll(".mol-pill").forEach((btn) => {
+        btn.className = "mol-pill rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50";
+      });
+      document.getElementById(`mol-${key}`).className =
+        "mol-pill rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm";
+
+      const m = MOLECULES[key];
+      document.getElementById("covTitle").textContent = m.title;
+      document.getElementById("covSubtitle").textContent = m.subtitle;
+      document.getElementById("cardBondType").textContent = m.bondType;
+      document.getElementById("cardBondSymbol").textContent = m.bondSymbol;
+      document.getElementById("cardSharedElectrons").textContent = m.sharedElectrons;
+      document.getElementById("cardSharedPairs").textContent = m.sharedPairs;
+      document.getElementById("cardSaturation").textContent = m.saturation;
+
+      renderCovalentCanvas();
+    }
+
+    function renderCovalentCanvas() {
+      cCtx.clearRect(0, 0, covCanvas.width, covCanvas.height);
+      const mol = MOLECULES[currentMolKey];
+
+      // Left Panel Label: Electron Dot Diagram
+      cCtx.fillStyle = "#1e293b";
+      cCtx.font = "bold 13px sans-serif";
+      cCtx.textAlign = "center";
+      cCtx.fillText("ELECTRON DOT STRUCTURE (LEWIS DIAGRAM)", 355, 32);
+
+      // 1. Overlapping Valence Shells
+      if (showShells) {
+        mol.atoms.forEach((a) => {
+          cCtx.strokeStyle = "rgba(100, 116, 139, 0.45)";
+          cCtx.fillStyle = "rgba(241, 245, 249, 0.35)";
+          cCtx.lineWidth = 2;
+          cCtx.beginPath();
+          cCtx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+          cCtx.fill();
+          cCtx.stroke();
+        });
+      }
+
+      // 2. Atomic Nuclei / Symbols
+      mol.atoms.forEach((a) => {
+        cCtx.fillStyle = a.color;
+        cCtx.beginPath();
+        cCtx.arc(a.x, a.y, 18, 0, Math.PI * 2);
+        cCtx.fill();
+
+        cCtx.fillStyle = "#ffffff";
+        cCtx.font = "bold 15px sans-serif";
+        cCtx.textAlign = "center";
+        cCtx.fillText(a.el, a.x, a.y + 5);
+      });
+
+      // 3. Valence Electrons (Dots & Crosses)
+      mol.sharedDots.forEach((d) => {
+        if (d.type === "H") {
+          // Cross (×) for Hydrogen electron
+          cCtx.strokeStyle = "#2563eb";
+          cCtx.lineWidth = 2.5;
+          cCtx.beginPath();
+          cCtx.moveTo(d.x - 4, d.y - 4);
+          cCtx.lineTo(d.x + 4, d.y + 4);
+          cCtx.moveTo(d.x + 4, d.y - 4);
+          cCtx.lineTo(d.x - 4, d.y + 4);
+          cCtx.stroke();
+        } else {
+          // Solid dot (•) for Carbon/Oxygen/Nitrogen electron
+          cCtx.fillStyle = d.type === "C" ? "#ea580c" : d.type === "O" ? "#dc2626" : "#059669";
+          cCtx.beginPath();
+          cCtx.arc(d.x, d.y, 4.2, 0, Math.PI * 2);
+          cCtx.fill();
+        }
+      });
+
+      // Legend at Bottom Left
+      cCtx.font = "12px sans-serif";
+      cCtx.fillStyle = "#475569";
+      cCtx.fillText("• Orange/Red/Green Dot = C/O/N valence electron    × Blue Cross = H valence electron", 355, 368);
+
+      // 4. Right Side Structural Bond Representation Card
+      if (showBondLines) {
+        cCtx.fillStyle = "#ffffff";
+        cCtx.strokeStyle = "#cbd5e1";
+        cCtx.lineWidth = 1.5;
+        cCtx.beginPath();
+        cCtx.roundRect(680, 55, 370, 275, 14);
+        cCtx.fill();
+        cCtx.stroke();
+
+        cCtx.fillStyle = "#1d4ed8";
+        cCtx.font = "bold 13px sans-serif";
+        cCtx.fillText("STRUCTURAL COVALENT FORMULA", 865, 85);
+
+        cCtx.fillStyle = "#0f172a";
+        cCtx.font = "bold 24px monospace";
+        cCtx.textAlign = "left";
+        mol.structuralLines.forEach((line, idx) => {
+          cCtx.fillText(line, 765, 138 + idx * 32);
+        });
+
+        cCtx.textAlign = "center";
+        cCtx.fillStyle = "#64748b";
+        cCtx.font = "11px sans-serif";
+        cCtx.fillText("Each dash (—) represents 1 shared electron pair", 865, 312);
+      }
+    }
+
+    // =========================================================================
+    // TAB 2: HYDROCARBONS & FUNCTIONAL GROUP BUILDER
+    // =========================================================================
+    const hydroCanvas = document.getElementById("hydroCanvas");
+    const hCtx = hydroCanvas.getContext("2d");
+
+    const ROOTS = ["", "Meth", "Eth", "Prop", "But", "Pent", "Hex"];
+    const SUBSCRIPTS = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉", "₁₀", "₁₁", "₁₂", "₁₃", "₁₄"];
+
+    function toSubscript(num) {
+      if (num <= 1) return "";
+      return String(num)
+        .split("")
+        .map((d) => SUBSCRIPTS[parseInt(d, 10)] || d)
+        .join("");
+    }
+
+    document.getElementById("sliderCarbonN").addEventListener("input", updateHydroBuilder);
+    document.getElementById("selectSeries").addEventListener("change", updateHydroBuilder);
+    document.getElementById("selectFuncGroup").addEventListener("change", updateHydroBuilder);
+
+    function updateHydroBuilder() {
+      let n = parseInt(document.getElementById("sliderCarbonN").value, 10);
+      const series = document.getElementById("selectSeries").value;
+      const func = document.getElementById("selectFuncGroup").value;
+      const noteEl = document.getElementById("seriesNote");
+
+      // Alkenes and Alkynes require at least 2 carbons
+      if ((series === "alkene" || series === "alkyne") && n < 2) {
+        n = 2;
+        document.getElementById("sliderCarbonN").value = 2;
+        noteEl.classList.remove("hidden");
+      } else {
+        noteEl.classList.add("hidden");
+      }
+
+      const root = ROOTS[n];
+      document.getElementById("valCarbonN").textContent = `n = ${n} (${root}-)`;
+
+      // Calculate Hydrogen count & IUPAC naming
+      let hCount = series === "alkane" ? 2 * n + 2 : series === "alkene" ? 2 * n : 2 * n - 2;
+      let suffixBase = series === "alkane" ? "ane" : series === "alkene" ? "ene" : "yne";
+      let iupacName = "";
+      let molFormula = "";
+      let genFormula = "";
+      let molMass = 12 * n;
+
+      if (func === "none") {
+        iupacName = root + suffixBase;
+        molFormula = `C${toSubscript(n)}H${toSubscript(hCount)}`;
+        genFormula = series === "alkane" ? "CₙH₂ₙ₊₂" : series === "alkene" ? "CₙH₂ₙ" : "CₙH₂ₙ₋₂";
+        molMass += hCount * 1;
+      } else if (func === "alcohol") {
+        // Replace 1 H with -OH
+        const remH = hCount - 1;
+        iupacName = root + suffixBase.slice(0, -1) + "ol";
+        molFormula = `C${toSubscript(n)}H${toSubscript(remH)}OH`;
+        genFormula = "CₙH₂ₙ₊₁OH";
+        molMass += remH * 1 + 17;
+      } else if (func === "aldehyde") {
+        // Terminal carbon becomes -CHO
+        const remH = Math.max(1, hCount - 2);
+        iupacName = root + suffixBase.slice(0, -1) + "al";
+        molFormula = n === 1 ? "HCHO" : `C${toSubscript(n - 1)}H${toSubscript(remH)}CHO`;
+        genFormula = "CₙH₂ₙO";
+        molMass = 12 * n + (remH + 1) * 1 + 16;
+      } else if (func === "acid") {
+        // Terminal carbon becomes -COOH
+        const remH = Math.max(1, hCount - 2);
+        iupacName = root + suffixBase.slice(0, -1) + "oic acid";
+        molFormula = n === 1 ? "HCOOH" : `C${toSubscript(n - 1)}H${toSubscript(remH)}COOH`;
+        genFormula = "CₙH₂ₙO₂";
+        molMass = 12 * n + (remH + 1) * 1 + 32;
+      } else if (func === "halo") {
+        const remH = hCount - 1;
+        iupacName = "Chloro" + (root + suffixBase).toLowerCase();
+        molFormula = `C${toSubscript(n)}H${toSubscript(remH)}Cl`;
+        genFormula = "CₙH₂ₙ₊₁Cl";
+        molMass += remH * 1 + 35.5;
+      }
+
+      document.getElementById("iupacHeader").textContent = `IUPAC Name: ${iupacName} (${molFormula})`;
+      document.getElementById("iupacSub").textContent =
+        `${series === "alkane" ? "Saturated" : "Unsaturated"} ${series.charAt(0).toUpperCase() + series.slice(1)} Series — General Formula: ${genFormula}`;
+
+      document.getElementById("cardIupac").textContent = iupacName;
+      document.getElementById("cardRootWord").textContent = `Root: ${root} (${n} C)`;
+      document.getElementById("cardMolFormula").textContent = molFormula;
+      document.getElementById("cardGenFormula").textContent = `General: ${genFormula}`;
+      document.getElementById("cardMolMass").textContent = `${molMass} u`;
+
+      const isSat = series === "alkane";
+      document.getElementById("cardReactivity").textContent = isSat ? "Substitution" : "Addition Reaction";
+      document.getElementById("cardFlame").textContent = isSat ? "Clean blue flame" : "Yellow sooty flame";
+
+      // Condensed Formula text
+      let condensedParts = [];
+      for (let i = 0; i < n; i++) {
+        if (i === n - 1 && func === "aldehyde") condensedParts.push("CHO");
+        else if (i === n - 1 && func === "acid") condensedParts.push("COOH");
+        else if (i === n - 1 && func === "alcohol") condensedParts.push("CH₂OH");
+        else if (i === n - 1 && func === "halo") condensedParts.push("CH₂Cl");
+        else if (n === 1) condensedParts.push("CH₄");
+        else if (i === 0 || i === n - 1) condensedParts.push(series === "alkane" ? "CH₃" : "CH₂");
+        else condensedParts.push("CH₂");
+      }
+      document.getElementById("cardCondensed").textContent = condensedParts.join("—");
+
+      drawHydroStructure(n, series, func);
+    }
+
+    function drawHydroStructure(n, series, func) {
+      hCtx.clearRect(0, 0, hydroCanvas.width, hydroCanvas.height);
+
+      const spacing = 135;
+      const totalW = (n - 1) * spacing;
+      const startX = 550 - totalW / 2;
+      const cy = 175;
+
+      // 1. Draw Carbon-Carbon Backbone Bonds
+      for (let i = 0; i < n - 1; i++) {
+        const x1 = startX + i * spacing;
+        const x2 = startX + (i + 1) * spacing;
+
+        hCtx.strokeStyle = "#334155";
+        hCtx.lineWidth = 4;
+
+        // Place double/triple bond between C1 and C2
+        if (i === 0 && series === "alkene") {
+          hCtx.beginPath();
+          hCtx.moveTo(x1, cy - 6);
+          hCtx.lineTo(x2, cy - 6);
+          hCtx.moveTo(x1, cy + 6);
+          hCtx.lineTo(x2, cy + 6);
+          hCtx.stroke();
+        } else if (i === 0 && series === "alkyne") {
+          hCtx.beginPath();
+          hCtx.moveTo(x1, cy - 9);
+          hCtx.lineTo(x2, cy - 9);
+          hCtx.moveTo(x1, cy);
+          hCtx.lineTo(x2, cy);
+          hCtx.moveTo(x1, cy + 9);
+          hCtx.lineTo(x2, cy + 9);
+          hCtx.stroke();
+        } else {
+          hCtx.beginPath();
+          hCtx.moveTo(x1, cy);
+          hCtx.lineTo(x2, cy);
+          hCtx.stroke();
+        }
+      }
+
+      // 2. Draw Each Carbon Atom & Its Attached Hydrogens / Functional Group
+      for (let i = 0; i < n; i++) {
+        const cx = startX + i * spacing;
+        const isLast = i === n - 1;
+        const isFirst = i === 0;
+
+        // Calculate remaining valency on Carbon i (max 4)
+        let usedValency = 0;
+        if (i > 0) usedValency += i === 1 && series === "alkene" ? 2 : i === 1 && series === "alkyne" ? 3 : 1;
+        if (i < n - 1) usedValency += i === 0 && series === "alkene" ? 2 : i === 0 && series === "alkyne" ? 3 : 1;
+
+        // Special terminal functional groups (Aldehyde / Carboxylic acid)
+        if (isLast && (func === "aldehyde" || func === "acid")) {
+          // Double bond =O upwards
+          hCtx.strokeStyle = "#334155";
+          hCtx.lineWidth = 3.5;
+          hCtx.beginPath();
+          hCtx.moveTo(cx - 5, cy);
+          hCtx.lineTo(cx - 5, cy - 75);
+          hCtx.moveTo(cx + 5, cy);
+          hCtx.lineTo(cx + 5, cy - 75);
+          hCtx.stroke();
+          drawAtomCircle(cx, cy - 75, "O", "#dc2626", "#fff");
+
+          // Right attachment: -H for Aldehyde, -OH for Carboxylic Acid
+          hCtx.beginPath();
+          hCtx.moveTo(cx, cy);
+          hCtx.lineTo(cx + 75, cy);
+          hCtx.stroke();
+
+          if (func === "aldehyde") {
+            drawAtomCircle(cx + 75, cy, "H", "#ffffff", "#0f172a");
+          } else {
+            drawAtomCircle(cx + 75, cy, "OH", "#dc2626", "#fff");
+          }
+
+          if (n === 1) {
+            // Left H for Methanal / Methanoic acid
+            hCtx.beginPath();
+            hCtx.moveTo(cx, cy);
+            hCtx.lineTo(cx - 75, cy);
+            hCtx.stroke();
+            drawAtomCircle(cx - 75, cy, "H", "#ffffff", "#0f172a");
+          }
+        } else {
+          const freeBonds = 4 - usedValency;
+          const bondDirs = [];
+          if (freeBonds >= 1) bondDirs.push({ dx: 0, dy: -75 }); // Top
+          if (freeBonds >= 2) bondDirs.push({ dx: 0, dy: 75 });  // Bottom
+          if (freeBonds >= 3 && isFirst) bondDirs.push({ dx: -75, dy: 0 }); // Left
+          if (freeBonds >= 3 && isLast && n > 1) bondDirs.push({ dx: 75, dy: 0 }); // Right
+          if (freeBonds === 4) bondDirs.push({ dx: 75, dy: 0 }); // Methane right
+
+          bondDirs.forEach((dir, idx) => {
+            const tx = cx + dir.dx;
+            const ty = cy + dir.dy;
+            hCtx.strokeStyle = "#475569";
+            hCtx.lineWidth = 3;
+            hCtx.beginPath();
+            hCtx.moveTo(cx, cy);
+            hCtx.lineTo(tx, ty);
+            hCtx.stroke();
+
+            // Attach functional group on final bond of last carbon
+            const attachGroup = isLast && idx === bondDirs.length - 1;
+            if (attachGroup && func === "alcohol") {
+              drawAtomCircle(tx, ty, "OH", "#dc2626", "#fff");
+            } else if (attachGroup && func === "halo") {
+              drawAtomCircle(tx, ty, "Cl", "#059669", "#fff");
+            } else {
+              drawAtomCircle(tx, ty, "H", "#ffffff", "#0f172a");
+            }
+          });
+        }
+
+        // Draw Carbon Atom on top
+        drawAtomCircle(cx, cy, "C", "#1e293b", "#ffffff");
+      }
+    }
+
+    function drawAtomCircle(x, y, label, bg, fg) {
+      hCtx.fillStyle = bg;
+      hCtx.strokeStyle = "#334155";
+      hCtx.lineWidth = 2;
+      hCtx.beginPath();
+      hCtx.arc(x, y, 20, 0, Math.PI * 2);
+      hCtx.fill();
+      hCtx.stroke();
+
+      hCtx.fillStyle = fg;
+      hCtx.font = "bold 14px sans-serif";
+      hCtx.textAlign = "center";
+      hCtx.fillText(label, x, y + 5);
+    }
+
+    function resetLab() {
+      selectMolecule("ch4");
+      document.getElementById("sliderCarbonN").value = 3;
+      document.getElementById("selectSeries").value = "alkane";
+      document.getElementById("selectFuncGroup").value = "none";
+      updateHydroBuilder();
+    }
+
+    selectMolecule("ch4");
+    updateHydroBuilder();
+  </script>
+</body>
+</html>
